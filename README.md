@@ -34,7 +34,7 @@ kubectl apply -f deployment.yaml
 By not calling `app.enableShutdownHooks()` (i.e., not enabling NestJS shutdown hooks), the default behaviour of the application is to receive a signal and shutdown immediatly. [Details here](images/disableShutdownHooks.png).
 
 How to test:
-- Comment out the line where the hooks are enabled in [main](src/main.ts#10)
+- Comment out the line where the hooks are enabled in [main](src/main.ts#L10)
 - Run the application
 - Make a test request as mentioned above
 - Send a SIGTERM to the process running the server
@@ -56,7 +56,7 @@ NOTE: for the following scenarios, the shutdown hooks were always enabled.
 In the event of a scale down (like the one triggered by HPA - HorizontalPodAutoscaler, or in the case of rolling update during a deploy), Kubernetes will send a SIGTERM signal to the application and, after the termination grace period has passed, it executes a forcible shutdown. The scenario where all the current requests are finished before termination grace period ends are processed successfully. [Details here](images/shutdownKubernetes.png).
 
 How to test:
-- Change the delay time in [app.service.ts](src/app.service.ts#L15) to a value SMALLER than the Pods termination grace period set in [deployment.yaml](deployment.yaml#30)
+- Change the delay time in [app.service.ts](src/app.service.ts#L15) to a value SMALLER than the Pods termination grace period set in [deployment.yaml](deployment.yaml#L30)
 - Create the deployment on k8s as instructed above (rebuild the Docker image and recreate the deployment so the changes are reflected to the running server)
 - Watch out for the logs
 ```bash
@@ -76,5 +76,5 @@ kubectl scale --replicas=0 -f deployment.yaml
 Finally, the scenario where some of the current requests are not finished before termination grace period expires will end in error. [Details here](images/forceShutdownKubernetes.png).
 
 How to test:
-- Change the delay time in [app.service.ts](src/app.service.ts#L15) to a value BIGGER than the Pods termination grace period set in [deployment.yaml](deployment.yaml#30)
+- Change the delay time in [app.service.ts](src/app.service.ts#L15) to a value BIGGER than the Pods termination grace period set in [deployment.yaml](deployment.yaml#L30)
 - Repeat all the steps from the previous scenario
