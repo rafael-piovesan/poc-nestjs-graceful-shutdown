@@ -73,8 +73,19 @@ kubectl scale --replicas=0 -f deployment.yaml
 ```
 
 ### Running on k8s AND reaching the Pods termination grace period (shutdown hooks enabled)
-Finally, the scenario where some of the current requests are not finished before termination grace period expires will end in error. [Details here](images/forceShutdownKubernetes.png).
+The scenario where some of the current requests are not finished before termination grace period expires will end in error. [Details here](images/forceShutdownKubernetes.png).
 
 How to test:
 - Change the delay time in [app.service.ts](src/app.service.ts#L15) to a value BIGGER than the Pods termination grace period set in [deployment.yaml](deployment.yaml#L30)
+- Repeat all the steps from the previous scenario
+
+### Running on k8s as a subprocess from container's entrypoint
+This last sceneario is an edge case, but still worth to be evaluated. All tests up to this point were based in this [Dockerfile](Dockerfile), but this test case is based in [Dockerfile.start-script](Dockerfile.start-script). The main difference is that instead of using the original container entrypoint (the `node` command), the container will execute a shell script, which, in turn, will call the `node` command as a subprocess. The result is that when Kubernetes sends a SIGTERM to the Pod, the signal is not propagated to the child process, preventing the server to be notified of an upcoming shutdown. [Details here](images/shutdownParentScript.png).
+
+How to test:
+- Rebuild the docker image using the alternative Dockerfile
+```bash
+docker build . -f Dockerfile.start-script -t poc-nestjs
+```
+- Recreate the deployment on k8s (so as to use the updated docker image)
 - Repeat all the steps from the previous scenario

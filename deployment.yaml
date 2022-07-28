@@ -27,4 +27,4 @@ spec:
           imagePullPolicy: Never
           ports:
             - containerPort: 3000
-      terminationGracePeriodSeconds: 20
+      terminationGracePeriodSeconds: 50

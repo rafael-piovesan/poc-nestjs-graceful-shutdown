@@ -1,4 +1,4 @@
-FROM node:16.8.0
+FROM node:16.8.0 as build
 WORKDIR /app
 COPY package.json package-lock.json /app/
 RUN npm install
@@ -6,4 +6,7 @@ RUN npm install
 COPY . /app
 RUN npm run build
 
+FROM gcr.io/distroless/nodejs:16
+COPY --from=build /app /app
+WORKDIR /app
 CMD ["dist/main"]

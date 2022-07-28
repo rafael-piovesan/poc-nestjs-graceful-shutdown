@@ -1,0 +1,18 @@
+FROM node:16.8.0
+WORKDIR /app
+COPY package.json package-lock.json /app/
+RUN npm install
+
+COPY . /app
+RUN npm run build
+
+RUN echo "#!/bin/bash\n"\
+  "PORT=3000 node dist/main &\n"\
+  "PORT=3001 node dist/main &\n"\
+  "PORT=3002 node dist/main &\n"\
+  "wait -n\n"\
+  "exit \$?" > start.sh
+
+RUN chmod 555 start.sh
+
+CMD ./start.sh
