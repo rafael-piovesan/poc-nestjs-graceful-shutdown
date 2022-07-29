@@ -48,7 +48,16 @@ kill -15 <pid>
 On the other hand, by explicitly calling `app.enableShutdownHooks()` (i.e., enabling NestJS shutdown hooks), when the application receives a signal it will finish processing the current requests and only afterwards it will shutdown. [Details here](images/enableShutdownHooks.png).
 
 How to test:
-- Repeat all the steps listed on the prior section
+- Revert the changes in [main](src/main.ts#L10) (enable the hooks again)
+- Recreate the Docker image
+- Run the application
+- Make a test request as mentioned above
+- Send a SIGTERM to the process running the server
+```bash
+kill -s SIGTERM <pid>
+# or
+kill -15 <pid>
+```
 
 NOTE: for the following scenarios, the shutdown hooks were always enabled.
 
@@ -66,8 +75,7 @@ kubectl logs -l app=poc-nestjs
 ```bash
 kubectl port-forward deploy/poc-nestjs-deployment 3000:3000
 ```
-- Make a test request
-- Scale down the pod replicas
+- Make a test request and quickly scale down the pod replicas
 ```bash
 kubectl scale --replicas=0 -f deployment.yaml
 ```
@@ -77,9 +85,10 @@ The scenario where some of the current requests are not finished before terminat
 
 How to test:
 - Change the delay time in [app.service.ts](src/app.service.ts#L15) to a value BIGGER than the Pods termination grace period set in [deployment.yaml](deployment.yaml#L30)
+- Recreate the Docker image and the deployment, so changes will take place
 - Repeat all the steps from the previous scenario
 
-### Running on k8s as a subprocess from container's entrypoint
+### Running on k8s as a subprocess of container's entrypoint
 This last sceneario is an edge case, but still worth to be evaluated. All tests up to this point were based in this [Dockerfile](Dockerfile), but this test case is based in [Dockerfile.start-script](Dockerfile.start-script). The main difference is that instead of using the original container entrypoint (the `node` command), the container will execute a shell script, which, in turn, will call the `node` command as a subprocess. The result is that when Kubernetes sends a SIGTERM to the Pod, the signal is not propagated to the child process, preventing the server to be notified of an upcoming shutdown. [Details here](images/shutdownParentScript.png).
 
 How to test:
