@@ -3,7 +3,7 @@ import { Injectable, OnApplicationShutdown } from '@nestjs/common';
 @Injectable()
 export class AppService implements OnApplicationShutdown {
   async getHello(): Promise<string> {
-    await sleep()
+    await sleep();
     return 'Hello World!';
   }
 
@@ -12,6 +12,6 @@ export class AppService implements OnApplicationShutdown {
   }
 }
 
-async function sleep(t: number = 30000): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, t));
+async function sleep(t = 30_000): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, t));
 }
